@@ -17,17 +17,14 @@ class TestBTreeSearch(unittest.TestCase):
 
     def test_find_in_keys(self):
         for i in (4, 6, 11, 20):
-            self.assertEqual((True, i), self.btree._find(i))
             self.assertEqual(i, self.btree[i])
 
     def test_find_in_children(self):
         for i in (1, 2, 5, 7, 8, 9, 10, 12, 14, 15, 16):
-            self.assertEqual((True, i), self.btree._find(i))
             self.assertEqual(i, self.btree[i])
 
     def test_find_nonexistant(self):
         for i in (3, 13, 17, 21, 22):
-            self.assertEqual(False, self.btree._find(i)[0])
             self.assertRaises(KeyError, lambda: self.btree[i])
 
 if __name__ == '__main__':
