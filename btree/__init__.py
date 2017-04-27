@@ -21,12 +21,9 @@ class BTree():
     def height(self):
         return self._height
 
-    def _find(self, value, root=-1):
+    def _find(self, value, root):
         if root is None:
             return (False, None)
-
-        if root == -1:
-            root = self._root
 
         for i, (key, node_less) in enumerate(zip(root[1], root[2])):
             if self._eq(key, value):
@@ -46,7 +43,12 @@ class BTree():
 
 
     def __getitem__(self, value):
-        pass
+        found, item = self._find(value, self._root)
+        if found:
+            return item
+        else:
+            e = KeyError(repr(value))
+            raise e
 
     def insert(self, value):
         for key in self._root:
