@@ -14,12 +14,18 @@ class BTree():
             e = NotImplementedError('Order must be 1 + 2**n, for some integer n (for now anyway)')
             raise e
 
-        self._order = order
         self._root = [BTree._LEAF_TYPE,
                       [[BTree._EMPTY_KEY, None]]*(order - 1) + [[BTree._MAX_KEY, None]]]
-        self._height = 1
+
         self._gt = gt_func
         self._eq = eq_func
+
+        self._order = order
+        self._min_keys = (order - 1) / 2
+        self._max_keys = order - 1
+
+        self._height = 1
+        self._count = 0
 
     @property
     def order(self):
@@ -29,6 +35,9 @@ class BTree():
     def height(self):
         return self._height
 
+    def __len__(self):
+        return self._count
+
     def _find(self, value, root):
         if root[0] is BTree._INTERNAL_NODE_TYPE:
             for key, node_less in root[1]:
@@ -36,7 +45,7 @@ class BTree():
                     return (False, None)
 
                 elif key is BTree._MAX_KEY or self._gt(key, value):
-                    return self._find(value, root=node_less)
+                    return self._find(value, node_less)
 
                 elif self._eq(key, value):
                     return (True, key)
