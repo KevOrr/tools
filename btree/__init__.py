@@ -3,12 +3,20 @@
 import operator
 
 class BTree():
-    _INTERNAL_NODE_TYPE = 1
-    _LEAF_TYPE = 2
+    _EMPTY_KEY = object()
+    _MAX_KEY = object()
+
+    _INTERNAL_NODE_TYPE = object()
+    _LEAF_TYPE = object()
 
     def __init__(self, order, gt_func=operator.gt, eq_func=operator.eq):
+        if bin(order)[2:].count('1') != 1:
+            e = NotImplementedError('Order must be a power of 2, for now anyway')
+            raise e
+
         self._order = order
-        self._root = (BTree._LEAF_TYPE, [None]*(order - 1), [None]*(order))
+        self._root = [BTree._LEAF_TYPE,
+                      [[BTree._EMPTY_KEY, None]]*(order - 1) + [[BTree._MAX_KEY, None]]]
         self._height = 1
         self._gt = gt_func
         self._eq = eq_func
@@ -22,18 +30,22 @@ class BTree():
         return self._height
 
     def _find(self, value, root):
-        if root is None:
-            return (False, None)
+            for i, (key, node_less) in enumerate(root[1]):
+                if key is BTree._EMPTY_KEY:
+                    return (False, None)
 
-        for i, (key, node_less) in enumerate(zip(root[1], root[2])):
-            if self._eq(key, value):
-                return (True, key)
+                elif key is BTree._MAX_KEY or self._gt(key, value):
+                    if root[0] == BTree._LEAF_TYPE:
+                        return (False, None)
+                    elif root[0] == BTree._INTERNAL_NODE_TYPE:
+                        return self._find(value, root=node_less)
+
+                elif self._eq(key, value):
+                    return (True, key)
+
 
             elif key is None or self._gt(key, value):
                 if root[0] == BTree._LEAF_TYPE:
-                    return (False, None)
-                elif root[0] == BTree._INTERNAL_NODE_TYPE:
-                    return self._find(value, root=node_less)
 
         # If not a leaf and search value > last key in this key, then search on rightmost child
         if root[0] == BTree._INTERNAL_NODE_TYPE and self._gt(value, key):
