@@ -75,28 +75,24 @@ class BTree():
         return self._insert(value, self._root)
 
     def _insert(self, value, root):
-        root_type = root[0]
         keys = root[1]
-        children = root[2]
 
-        for i, (key, node_less) in enumerate(zip(keys, children)):
-            if self._eq(key, value):
-                return False
+        if root[0] is BTree._LEAF_TYPE:
+            for i, (key, node_less) in enumerate(keys):
+                if self._eq(key, value):
+                    return False
 
-            elif key is None:
-                keys[i] = value
+                elif key is BTree._EMPTY_KEY:
+                    keys[i] = [value, None]
 
-            elif self._gt(key, value):
-                keys[:] = keys[:i] + [value] + keys[i+1:]
+                elif key is BTree._MAX_KEY:
+                    pass
 
-                if root_type == BTree._INTERNAL_NODE_TYPE:
-                    children[:] = children[:i] + [None] + children[i+1:]
+                elif self._gt(key, value):
+                    keys[:] = keys[:i] + [[value, None]] + keys[i:]
 
-                if keys[-1] is None:
-                    keys[:] = keys[:-1]
+        elif root[0] is BTree._INTERNAL_NODE_TYPE:
+            children[:] = children[:i] + [None] + children[i+1:]
 
-        # If not a leaf and search value > last key in this key, then search on rightmost child
-        if root_type == BTree._INTERNAL_NODE_TYPE and self._gt(value, key):
-            return self._find(value, root=children[i+1])
-
-        return (False, None)
+            if keys[-1] is None:
+                keys[:] = keys[:-1]
