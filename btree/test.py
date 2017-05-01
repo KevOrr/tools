@@ -10,21 +10,15 @@ class TestBTreeSearch(unittest.TestCase):
         empty_leaf = [None, None, None, None, None]
         self.btree._root = (BTree._INTERNAL_NODE_TYPE, [
             [4, [BTree._LEAF_TYPE,
-                 [[1, None], [2, None],
-                  [BTree._EMPTY_KEY, None], [BTree._EMPTY_KEY, None], [BTree._MAX_KEY, None]]]],
+                 [1, 2, BTree._EMPTY_KEY, BTree._EMPTY_KEY]]],
             [6, [BTree._LEAF_TYPE,
-                 [[5, None],
-                  [BTree._EMPTY_KEY, None], [BTree._EMPTY_KEY, None], [BTree._EMPTY_KEY, None],
-                  [BTree._MAX_KEY, None]]]],
+                 [5, BTree._EMPTY_KEY, BTree._EMPTY_KEY, BTree._EMPTY_KEY,]]],
             [11, [BTree._LEAF_TYPE,
-                  [[7, None], [8, None], [9, None], [10, None],
-                   [BTree._MAX_KEY, None]]]],
+                  [7, 8, 9, 10]]],
             [20, [BTree._LEAF_TYPE,
-                  [[12, None], [14, None], [15, None], [16, None],
-                   [BTree._MAX_KEY, None]]]],
+                  [12, 14, 15, 16]]],
             [BTree._MAX_KEY, [BTree._LEAF_TYPE,
-                              [[25, None], [27, None], [31, None],
-                               [BTree._EMPTY_KEY, None], [BTree._MAX_KEY, None]]]]])
+                              [25, 27, 31, BTree._EMPTY_KEY]]]])
 
     def test_find_in_children(self):
         for i in (1, 2, 5, 7, 8, 9, 10, 12, 14, 15, 16):

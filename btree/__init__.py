@@ -39,6 +39,8 @@ class BTree():
         return self._count
 
     def _find(self, value, root):
+        '''BTree._find(self, value, root) => (found, item)'''
+
         if root[0] is BTree._INTERNAL_NODE_TYPE:
             for key, node_less in root[1]:
                 if key is BTree._EMPTY_KEY:
@@ -48,12 +50,14 @@ class BTree():
                     return self._find(value, node_less)
 
         elif root[0] is BTree._LEAF_TYPE:
-            for key, _ in root[1]:
-                if key is BTree._EMPTY_KEY or key is BTree._MAX_KEY or self._gt(key, value):
+            for item in root[1]:
+                if item is BTree._EMPTY_KEY or self._gt(item, value):
                     return (False, None)
 
-                elif self._eq(key, value):
-                    return (True, key)
+                elif self._eq(item, value):
+                    return (True, item)
+
+            return (False, None)
 
 
         assert False
