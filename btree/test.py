@@ -8,7 +8,7 @@ class TestBTreeSearch(unittest.TestCase):
         self.btree = BTree(5)
 
         empty_leaf = [None, None, None, None, None]
-        self.btree._root = (BTree._INTERNAL_NODE_TYPE, [
+        self.btree._root = [BTree._INTERNAL_NODE_TYPE, [
             [4, [BTree._LEAF_TYPE,
                  [1, 2, BTree._EMPTY_KEY, BTree._EMPTY_KEY]]],
             [6, [BTree._LEAF_TYPE,
@@ -18,7 +18,7 @@ class TestBTreeSearch(unittest.TestCase):
             [20, [BTree._LEAF_TYPE,
                   [12, 14, 15, 16]]],
             [BTree._MAX_KEY, [BTree._LEAF_TYPE,
-                              [25, 27, 31, BTree._EMPTY_KEY]]]])
+                              [25, 27, 31, BTree._EMPTY_KEY]]]]]
 
     def test_find_in_children(self):
         for i in (1, 2, 5, 7, 8, 9, 10, 12, 14, 15, 16):

@@ -38,6 +38,44 @@ class BTree():
     def __len__(self):
         return self._count
 
+    def __str__(self):
+        return self._to_str(self._root)
+
+    def __getitem__(self, value):
+        found, item = self._find(value, self._root)
+        if found:
+            return item
+        else:
+            e = KeyError(repr(value))
+            raise e
+
+    def insert(self, value):
+        return self._insert(value, self._root)
+
+
+    def _to_str(self, root):
+        if root[0] is BTree._LEAF_TYPE:
+            if self._count_keys(root[1]):
+                s = '|' + '|'.join(str(item) for item in root[1] if item is not BTree._EMPTY_KEY) + '|'
+                return '-'*len(s) + '\n' + s + '\n' + '-'*len(s)
+
+        elif root[0] is BTree._INTERNAL_NODE_TYPE:
+            lines = ['', '', '', '']
+            for key, node_less in root[1]:
+                if key is BTree._EMPTY_KEY:
+                    break
+
+
+                new_lines = self._to_str(node_less).split('\n')
+
+                # Dunno why this doesn't work
+                # lines[0] += '{:>{width}}'.format(key, width=len(new_lines[0]))
+
+                lines[0] += '%*s' % (len(new_lines[0]) + 1, key if key is not BTree._MAX_KEY else '')
+                lines[1:] = [a + b + ' ' for a,b in zip(lines[1:], new_lines)]
+
+            return '\n'.join(lines)
+
     def _find(self, value, root):
         '''BTree._find(self, value, root) => (found, item)'''
 
@@ -63,14 +101,6 @@ class BTree():
         assert False
         return (False, None)
 
-
-    def __getitem__(self, value):
-        found, item = self._find(value, self._root)
-        if found:
-            return item
-        else:
-            e = KeyError(repr(value))
-            raise e
 
     def _count_keys(self, lst):
         return len([x for x in lst if x is not BTree._EMPTY_KEY and x is not BTree._MAX_KEY])
@@ -109,14 +139,9 @@ class BTree():
                 return root[i:] + [value, new_child] + root[i:]
 
 
-    def insert(self, value):
-        return self._insert(value, self._root)
-
     # TODO test this
     def _insert(self, value, root):
         '''BTree._insert(self, value, root) => new_child'''
-
-        keys = root[1]
 
         if root[0] is BTree._INTERNAL_NODE_TYPE:
             for key, node_less in root[1]:
