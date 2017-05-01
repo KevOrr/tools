@@ -136,8 +136,14 @@ class BTree():
             assert key is not BTree._EMPTY_KEY
 
             if key is BTree._MAX_KEY or self._gt(key, value):
-                return root[i:] + [value, new_child] + root[i:]
+                return root[1][i:] + [value, new_child] + root[1][i:]
 
+    def _insert_into_leaf(self, new_value, root):
+        for i, item in enumerate(root[1]):
+            if item is BTree._EMPTY_KEY:
+                return [root[0], root[1][:i] + [new_value] + root[1][i:-1]]
+            elif self._gt(item, new_value):
+                return [root[0], root[1][:i] + [new_value] + root[1][i:]]
 
     # TODO test this
     def _insert(self, value, root):
@@ -179,9 +185,7 @@ class BTree():
 
         elif root[0] is BTree._LEAF_TYPE:
             if self._count_keys(root) < self._max_keys:
-                self._insert_leaf(self, value, root)
+                root[:] = self._insert_into_leaf(value, root)
             else:
                 root[:], new_child = self._split_leaf(root)
                 return new_child
-
-        assert False
