@@ -72,28 +72,80 @@ class BTree():
             e = KeyError(repr(value))
             raise e
 
+    def _count_keys(self, lst):
+        return len([x for x in lst if x is not BTree._EMPTY_KEY and x is not BTree._MAX_KEY])
+
+    def _split_leaf(self, lst):
+        left = lst[:self._min_keys] + [BTree._EMPTY_KEY]*self._min_keys
+        right = lst[self._min_keys:]
+        right += [BTree._EMPTY_KEY]*(self._max_keys + 1 - len(right))
+        return ([BTree._LEAF_TYPE, left], [BTree._LEAF_TYPE, right])
+
+    def _split_node(self, lst):
+        center = lst[self._min_keys][0]
+
+        left = lst[:self._min_keys]
+        left += [[BTree._MAX_KEY, lst[self._min_keys][1]]]
+        left += [[BTree._EMPTY_KEY, [BTree._EMPTY_KEY]*self._max_keys] for i in range(self._min_keys)]
+
+        right = lst[self._min_keys+1:]
+        right += [[BTree._EMPTY_KEY, [BTree._EMPTY_KEY]*self._max_keys] for i in range(self._max_keys + 1 - len(right))]
+
+        return (center, [BTree._INTERNAL_NODE_TYPE, left], [BTree._INTERNAL_NODE_TYPE, right])
+
+    def _get_smallest_value(self, node_or_leaf):
+        if node_or_leaf[0] is BTree._INTERNAL_NODE_TYPE:
+            return node_or_leaf[1][0][0]
+        elif node_or_leaf[0] is BTree._LEAF_TYPE:
+            return node_or_leaf[1][0]
+
+    def _insert_into_node(self, new_child, root):
+        value = self._get_smallest_value(new_child)
+
+        for i, (key, node_less) in root[1]:
+            assert key is not BTree._EMPTY_KEY
+
+            if key is BTree._MAX_KEY or self._gt(key, value):
+                return root[i:] + [value, new_child] + root[i:]
+
+
     def insert(self, value):
         return self._insert(value, self._root)
 
+    # TODO test this
     def _insert(self, value, root):
+        '''BTree._insert(self, value, root) => new_child'''
+
         keys = root[1]
 
-        if root[0] is BTree._LEAF_TYPE:
-            for i, (key, node_less) in enumerate(keys):
-                if self._eq(key, value):
-                    return False
+        if root[0] is BTree._INTERNAL_NODE_TYPE:
+            for key, node_less in root[1]:
+                assert key is not BTree._EMPTY_KEY
 
-                elif key is BTree._EMPTY_KEY:
-                    keys[i] = [value, None]
+                if key is BTree._MAX_KEY or self._gt(key, value):
+                    new_child = self._insert(value, node_less)
+                    if new_child is not None:
+                        if self._count_keys(root) < self._max_keys:
+                            root[:] = self._insert_into_node(new_child)
+                            return
 
-                elif key is BTree._MAX_KEY:
-                    pass
+                        inserted = self._insert_into_node(new_child, root)
+                        root[:], new_sibling = self._split_node(root)
+                        if root is self._root:
+                            new_root = [BTree._INTERNAL_NODE_TYPE,
+                                        [BTree._MAX_KEY, [BTree._LEAF_TYPE,
+                                                          [BTree._EMPTY_KEY]*self._max_keys]]]
+                            new_root = self._insert_into_node(root)
+                            new_root = self._insert_into_node(new_sibling)
+                            new_root += [[BTree._LEAF_TYPE, [BTree._EMPTY_KEY]*self._max_keys]
+                                         for i in range(self._max_keys + 1 - len(new_root))]
+                            self._root[:] = new_root
 
-                elif self._gt(key, value):
-                    keys[:] = keys[:i] + [[value, None]] + keys[i:]
+                    return
 
-        elif root[0] is BTree._INTERNAL_NODE_TYPE:
-            children[:] = children[:i] + [None] + children[i+1:]
-
-            if keys[-1] is None:
-                keys[:] = keys[:-1]
+        elif root[0] is BTree._LEAF_TYPE:
+            if self._count_keys(root) < self._max_keys:
+                self._insert_leaf(self, value, root)
+            else:
+                root[:], new_child = self._split_leaf(root)
+                return new_child
