@@ -26,10 +26,6 @@ class TestBTreeSearch(unittest.TestCase):
                               [[25, None], [27, None], [31, None],
                                [BTree._EMPTY_KEY, None], [BTree._MAX_KEY, None]]]]])
 
-    def test_find_in_keys(self):
-        for i in (4, 6, 11, 20):
-            self.assertEqual(i, self.btree[i])
-
     def test_find_in_children(self):
         for i in (1, 2, 5, 7, 8, 9, 10, 12, 14, 15, 16):
             self.assertEqual(i, self.btree[i])
@@ -38,7 +34,11 @@ class TestBTreeSearch(unittest.TestCase):
         for i in (25, 27, 31):
             self.assertEqual(i, self.btree[i])
 
-    def test_find_nonexistant(self):
+    def test_find_raises_in_keys(self):
+        for i in (4, 6, 11, 20):
+            self.assertRaises(KeyError, lambda: self.btree[i])
+
+    def test_find_raises_nonexistant(self):
         for i in (3, 13, 17, 21, 22):
             self.assertRaises(KeyError, lambda: self.btree[i])
 

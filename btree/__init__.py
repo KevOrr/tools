@@ -47,9 +47,6 @@ class BTree():
                 elif key is BTree._MAX_KEY or self._gt(key, value):
                     return self._find(value, node_less)
 
-                elif self._eq(key, value):
-                    return (True, key)
-
         elif root[0] is BTree._LEAF_TYPE:
             for key, _ in root[1]:
                 if key is BTree._EMPTY_KEY or key is BTree._MAX_KEY or self._gt(key, value):
