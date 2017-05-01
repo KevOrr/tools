@@ -150,22 +150,31 @@ class BTree():
                 if key is BTree._MAX_KEY or self._gt(key, value):
                     new_child = self._insert(value, node_less)
                     if new_child is not None:
+
+                        # Still space left in current node, just insert
                         if self._count_keys(root) < self._max_keys:
                             root[:] = self._insert_into_node(new_child)
-                            return
 
-                        inserted = self._insert_into_node(new_child, root)
-                        root[:], new_sibling = self._split_node(root)
-                        if root is self._root:
-                            new_root = [BTree._INTERNAL_NODE_TYPE,
-                                        [BTree._MAX_KEY, [BTree._LEAF_TYPE,
-                                                          [BTree._EMPTY_KEY]*self._max_keys]]]
-                            new_root = self._insert_into_node(root)
-                            new_root = self._insert_into_node(new_sibling)
-                            new_root += [[BTree._LEAF_TYPE, [BTree._EMPTY_KEY]*self._max_keys]
+                        # No space left, need caller to save new_sibling
+                        else:
+                            inserted = self._insert_into_node(new_child, root)
+                            root[:], new_sibling = self._split_node(root)
+
+                            # Unless we're actually on the root node, so do something else
+                            if root is self._root:
+                                new_root = [BTree._INTERNAL_NODE_TYPE,
+                                            [BTree._MAX_KEY, [BTree._LEAF_TYPE,
+                                                              [BTree._EMPTY_KEY]*self._max_keys]]]
+                                new_root = self._insert_into_node(root)
+                                new_root = self._insert_into_node(new_sibling)
+                                new_root += [[BTree._LEAF_TYPE, [BTree._EMPTY_KEY]*self._max_keys]
                                          for i in range(self._max_keys + 1 - len(new_root))]
-                            self._root[:] = new_root
+                                self._root[:] = new_root
+                                self._height += 1
+                            else:
+                                return new_sibling
 
+                    self._count += 1
                     return
 
         elif root[0] is BTree._LEAF_TYPE:
@@ -174,3 +183,5 @@ class BTree():
             else:
                 root[:], new_child = self._split_leaf(root)
                 return new_child
+
+        assert False
