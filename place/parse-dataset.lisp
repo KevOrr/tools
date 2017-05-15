@@ -93,10 +93,10 @@
 (defstruct csv-record
   ;; Author: Elijah Malaby
   (timestamp 0 :type (integer 0))
-  (user-id "" :type string)
-  (x 0 :type integer)
-  (y 0 :type integer)
-  (color-code 0 :type integer))
+  (user-id "" :type (string 28))
+  (x 0 :type (integer 0 1000))
+  (y 0 :type (integer 0 1000))
+  (color-code 0 :type (integer 0 15)))
 
 (defun parse-csv-line (stream)
   ;; Author: Elijah Malaby
@@ -127,49 +127,65 @@
             #xe5d900 #x94e044 #x02be01 #x00e5f0
             #x0083c7 #x0000ea #xe04aff #x820080)))
 
+(defun read-sort-csv (path)
+  (sort (with-open-file (stream path)
+          (read-line stream) ;discard header row
+          (loop :while (peek-char nil stream nil nil)
+                :collect (parse-csv-line stream)))
+        #'< :key #'csv-record-timestamp))
+
 (defun make-place-gif-skippy (time-per-frame
-                              &key (frame-rate 30) (in #p"tile_placements.csv") (out #p"place.gif"))
+                              &key (frame-rate 30) (in #p"tile_placements.csv" in-passed-p)
+                                (out #p"place.gif") tile-placements)
   (assert (> frame-rate 0))
+  (assert (not (and in-passed-p tile-placements)))
 
-  (with-open-file (stream in)
-    (read-line stream) ;discard header row
+  (let* (placements
+         (color-table (make-color-table))
+         (data-stream (make-data-stream :height 1001 :width 1001
+                                        :color-table color-table :loopingp t))
+         (colors (make-place-colors-skippy color-table))
+         (white (ensure-color #xffffff color-table))
+         (frame (make-image :data-stream data-stream :width 1001 :height 1001
+                            :image-data (make-image-data 1001 1001 :initial-element white)
+                            :delay-time (ceiling (/ 100 frame-rate)))))
 
-    (let* ((color-table (make-color-table))
-           (data-stream (make-data-stream :height 1001 :width 1001
-                                          :color-table color-table :loopingp t))
-           (colors (make-place-colors-skippy color-table))
-           (white (ensure-color #xffffff color-table))
-           (frame (make-image :data-stream data-stream :width 1001 :height 1001
-                              :image-data (make-image-data 1001 1001 :initial-element white)
-                              :delay-time (ceiling (/ 100 frame-rate)))))
+    (cond (tile-placements (setf placements tile-placements))
+          (t (format t "Reading and sorting csv...~%")
+             (setf placements (read-sort-csv in))))
 
-      (loop :with last-frame-start-ts
-            :with frame-number := 1
-            :for placement-number :from 1
-            :while (peek-char nil stream nil nil)
-            :do (with-slots ((ts timestamp) x y color-code) (parse-csv-line stream)
-                  (cond
-                    ;; Initial frame
-                    ((not last-frame-start-ts)
-                     (setf (pixel-ref frame x y) (nth color-code colors))
-                     (setf last-frame-start-ts ts))
+    (format t "Compiling gif...~%")
+    (loop :with last-frame-start-ts
+          :with frame-number := 1
+          :for placement-number :from 1
+          :while placements
+          :do (with-slots ((ts timestamp) x y color-code) (pop placements)
+                (setf (pixel-ref frame x y) (nth color-code colors))
+                (cond
+                  ;; Initial frame
+                  ((not last-frame-start-ts)
+                   (setf last-frame-start-ts ts))
 
-                    ;; Add current frame to animation, capture timestamp
-                    ((> (- ts last-frame-start-ts) time-per-frame)
-                     (break)
-                     (add-image frame data-stream)
-                     (setf last-frame-start-ts ts)
-                     (format t "Added frame ~d up to placement #~d (timestamp ~d)~%"
-                             frame-number placement-number ts)
-                     (incf frame-number))
+                  ;; Add current frame to animation, capture timestamp
+                  ((> (- ts last-frame-start-ts) time-per-frame)
+                   (add-image frame data-stream)
+                   (setf frame
+                         (make-image
+                          :data-stream data-stream :width 1001 :height 1001
+                          :image-data (make-image-data
+                                       1001 1001
+                                       :initial-element white
+                                       :initial-contents (image-data frame))
+                          :delay-time (ceiling (/ 100 frame-rate))))
+                   (setf last-frame-start-ts ts)
+                   #+()(format t "Added frame ~d up to placement #~d (timestamp ~d)~c"
+                           frame-number placement-number ts #\Return)
+                   (incf frame-number))))
 
-                    ;; Usual case, update current frame
-                    (t
-                     (setf (pixel-ref frame x y) (nth color-code colors)))))
+          :finally (add-image frame data-stream)
+                   (format t "Added frame ~d up to placement #~d~%"
+                           frame-number placement-number))
 
-            :finally (add-image frame data-stream)
-                     (format t "Added frame ~d up to placement #~d~%"
-                             frame-number placement-number))
-
-      (setf (loopingp data-stream) t)
-      (output-data-stream data-stream out))))
+    (format t "Writing gif out to ~A~%" (first (directory out)))
+    (setf (loopingp data-stream) t)
+    (output-data-stream data-stream out)))
