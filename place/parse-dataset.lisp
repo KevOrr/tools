@@ -136,31 +136,33 @@
 
 (defun make-place-gif-skippy (time-per-frame
                               &key (frame-rate 30) (in #p"tile_placements.csv" in-passed-p)
-                                (out #p"place.gif") tile-placements)
+                                (out #p"place.gif") tile-placements (verbosity 0))
   (assert (> frame-rate 0))
   (assert (not (and in-passed-p tile-placements)))
 
-  (let* (placements
-         (color-table (make-color-table))
+  (let* ((color-table (make-color-table))
          (data-stream (make-data-stream :height 1001 :width 1001
                                         :color-table color-table :loopingp t))
          (colors (make-place-colors-skippy color-table))
          (white (ensure-color #xffffff color-table))
          (frame (make-image :data-stream data-stream :width 1001 :height 1001
                             :image-data (make-image-data 1001 1001 :initial-element white)
-                            :delay-time (ceiling (/ 100 frame-rate)))))
+                            :delay-time (ceiling (/ 100 frame-rate))))
+         (placements (or tile-placements
+                         (progn (if (> verbosity 0)
+                                    (format t "Reading and sorting csv...~%"))
+                                (read-sort-csv in)))))
 
-    (cond (tile-placements (setf placements tile-placements))
-          (t (format t "Reading and sorting csv...~%")
-             (setf placements (read-sort-csv in))))
-
-    (format t "Compiling gif...~%")
+    (if (> verbosity 0)
+        (format t "Compiling gif...~%"))
     (loop :with last-frame-start-ts
+          :with final-ts
           :with frame-number := 1
           :for placement-number :from 1
           :while placements
           :do (with-slots ((ts timestamp) x y color-code) (pop placements)
                 (setf (pixel-ref frame x y) (nth color-code colors))
+                (setf final-ts ts)
                 (cond
                   ;; Initial frame
                   ((not last-frame-start-ts)
@@ -178,14 +180,17 @@
                                        :initial-contents (image-data frame))
                           :delay-time (ceiling (/ 100 frame-rate))))
                    (setf last-frame-start-ts ts)
-                   #+()(format t "Added frame ~d up to placement #~d (timestamp ~d)~c"
-                           frame-number placement-number ts #\Return)
+                   (if (> verbosity 1)
+                       (format t "Added frame ~d at tile placement #~d (timestamp ~d)~%"
+                               frame-number placement-number ts))
                    (incf frame-number))))
 
           :finally (add-image frame data-stream)
-                   (format t "Added frame ~d up to placement #~d~%"
-                           frame-number placement-number))
+                   (if (> verbosity 0)
+                       (format t "Added frame ~d at tile placement #~d (timestamp ~d)~%"
+                               frame-number placement-number final-ts)))
 
-    (format t "Writing gif out to ~A~%" (first (directory out)))
+    (if (> verbosity 0)
+        (format t "Writing gif out to ~A~%" (first (directory out))))
     (setf (loopingp data-stream) t)
     (output-data-stream data-stream out)))
