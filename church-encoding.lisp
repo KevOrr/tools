@@ -93,8 +93,7 @@
   (if bool #'true #'false))
 
 (defun unchurch-bool (churched-bool)
-  (declare ((member #'true #'false) churched-bool))
-  (if (eq churched-bool #'true) t cl:nil))
+  (funcall churched-bool t cl:nil))
 
 (defun-curry not (p) (funcall p #'false #'true))
 (defun-curry and (p q) (funcall p q p))
@@ -173,7 +172,22 @@
         (church n)
         `(church ,n))))
 
+(defun is-church-numeral (n)
+  (if (typep n 'function)
+      (let ((n-applied (funcall n #'cl:1+)))
+        (if (typep n-applied 'function)
+            (typep (funcall n-applied 0) '(integer 0))))))
+
 (defun enable-church-numeral-read-macro (&optional (char1 #\#) (char2 #\N))
   (if char2
       (set-dispatch-macro-character char1 char2 #'read-church-numeral)
-      (set-macro-character char1 #'read-church-numeral)))
+      (set-macro-character char1 #'read-church-numeral))
+  (set-pprint-dispatch '(satisfies is-church-numeral)
+                       (lambda (stream obj)
+                         (format stream "~A~A~d"
+                                 char1 (cl:or char2 "") (funcall obj #'cl:1+ 0)))))
+
+(set-pprint-dispatch '(satisfies is-church-numeral)
+                     (lambda (stream obj)
+                       (format stream "#.(~W ~d)" 'church (funcall obj #'cl:1+ 0)))
+                     10)
