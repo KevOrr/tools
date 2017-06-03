@@ -173,10 +173,15 @@
         `(church ,n))))
 
 (defun is-church-numeral (n)
-  (if (typep n 'function)
-      (let ((n-applied (funcall n #'cl:1+)))
-        (if (typep n-applied 'function)
-            (typep (funcall n-applied 0) '(integer 0))))))
+  (handler-case
+      (if (typep n '(function (&rest t)))
+          (let ((n-applied (funcall n #'cl:1+)))
+            (if (typep n-applied '(function (&rest t)))
+                (typep (funcall n-applied 0) '(integer 0)))))
+
+    (simple-error (ex)
+      (declare (ignore ex))
+      cl:nil)))
 
 (defun enable-church-numeral-read-macro (&optional (char1 #\#) (char2 #\N))
   (if char2
