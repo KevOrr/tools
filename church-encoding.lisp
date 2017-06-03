@@ -174,7 +174,9 @@
 
 (defun is-church-numeral (n)
   (handler-case
-      (if (typep n '(function (&rest t)))
+      (if (cl:and (cl:not (eq n #'true))
+                  (cl:not (eq n #'false))
+                  (typep n '(function (&rest t))))
           (let ((n-applied (funcall n #'cl:1+)))
             (if (typep n-applied '(function (&rest t)))
                 (typep (funcall n-applied 0) '(integer 0)))))
@@ -190,7 +192,8 @@
   (set-pprint-dispatch '(satisfies is-church-numeral)
                        (lambda (stream obj)
                          (format stream "~A~A~d"
-                                 char1 (cl:or char2 "") (funcall obj #'cl:1+ 0)))))
+                                 char1 (cl:or char2 "") (funcall obj #'cl:1+ 0)))
+                       10))
 
 (set-pprint-dispatch '(satisfies is-church-numeral)
                      (lambda (stream obj)
