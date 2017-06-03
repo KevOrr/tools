@@ -151,6 +151,20 @@
 (defun-curry cdr (z) (second (second z)))
 
 
+;; Division
+
+;; Recursive definition
+(defun-curry divide (n m f x)
+  (break)
+  (funcall
+   (lambda-curry (diff)
+     (>= diff 0
+         (funcall f (divide diff m f x))
+         (church 0 f x)))
+   (- n m)))
+
+
+
 ;; Reader macro for church numerals
 (defun read-church-numeral (stream macro-char &optional arg)
   (declare (ignore macro-char arg))
