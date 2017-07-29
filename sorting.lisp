@@ -69,6 +69,38 @@
              data))
     (helper (array-copy data) 0 (length data))))
 
+(defun radix-sort (data elt-func count-func radix)
+  (labels ((helper (data elt-func radix current-digit size)
+             (let ((buckets (loop :repeat radix :collect nil)))
+               (case (length data)
+                 ((0 1) data)
+                 (t
+                  (loop :for i :in data
+                        :do (let ((digit (funcall elt-func i current-digit)))
+                              (setf (elt buckets digit) (cons i (elt buckets digit)))))
+                  (if (< current-digit (1- size))
+                      (loop :for bucket :in buckets
+                            :nconc (helper (nreverse bucket) elt-func radix (1+ current-digit) size))
+                      (nconc (mapcar #'nreverse buckets))))))))
+    (let ((data (coerce data 'list))
+          (length-table (make-hash-table)))
+      (loop :for i :in data
+            :for length := (funcall count-func i)
+            :do (cond ((gethash length length-table)
+                       (setf (gethash length length-table)
+                             (cons i (gethash length length-table))))
+                      (t
+                       (setf (gethash length length-table)
+                             (list i)))))
+      (let ((sorted-lengths
+              ;; cheating?
+              (sort (loop :for length :being :each :hash-key :in length-table :using (:hash-value list)
+                          :collect (list length list))
+                    #'> :key #'first)))
+
+        (loop :for length-list :in sorted-lengths
+              :nconc (helper (nreverse (second length-list)) elt-func radix 0 (first length-list)))))))
+
 (defun slowsort (data)
   (labels ((inplace-slowsort (data &optional (a 0) (b (max 0 (1- (length data)))))
              (declare (vector data)
@@ -96,6 +128,7 @@
              (apply function args)
              (float (/ (- (get-internal-run-time) begin) internal-time-units-per-second)))))
     (loop :for i :from lower :to upper :by (floor (- upper lower) divisions)
+          :do (print i)
           :collect (list i (time-exec function (coerce (loop :for j :from 1 :to i
                                                              :collect j)
                                                        'vector))))))
