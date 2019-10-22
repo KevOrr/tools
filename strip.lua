@@ -103,24 +103,28 @@ function unloadOres()
 end
 
 function loadResources()
-  local idx = findItem("minecraft:torches")
-  if idx >= 1 then
-    turtle.select(i)
-    local count = turtle.getItemCount()
-    turtle.suckUp(math.max(64 - count, 0))
-  else
-    turtle.suckUp(64)
+  while not hasTorches() do
+    local idx = findItem("minecraft:torches")
+    if idx >= 1 then
+      turtle.select(i)
+      local count = turtle.getItemCount()
+      turtle.suckUp(math.max(64 - count, 0))
+    else
+      turtle.suckUp(64)
+    end
   end
   
-  idx = findItem("minecraft:charcoal")
-  if idx >= 1 then
-    turtle.select(i)
-    local count = turtle.getItemCount()
-    turtle.suck(math.max(64 - count, 0))
-  else
-    turtle.suckUp(64)
+  while not checkFuel() do
+    idx = findItem("minecraft:charcoal")
+    if idx >= 1 then
+      turtle.select(i)
+      local count = turtle.getItemCount()
+      turtle.suck(math.max(64 - count, 0))
+    else
+      turtle.suckUp(64)
+    end
+    refuelCharcoal()
   end
-  refuelCharcoal()
 end
 
 function findItem(name)
