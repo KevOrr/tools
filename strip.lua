@@ -38,7 +38,7 @@ function main()
 
     -- place a torch
     turtle.turnRight()
-    turtle.placeTorch{above=true}
+    placeTorch{above=true}
     turtle.turnLeft()
     turtle.turnLeft()
   end
@@ -108,6 +108,8 @@ function loadResources()
     turtle.select(i)
     local count = turtle.getItemCount()
     turtle.suckUp(math.max(64 - count, 0))
+  else
+    turtle.suckUp(64)
   end
   
   idx = findItem("minecraft:charcoal")
@@ -115,14 +117,16 @@ function loadResources()
     turtle.select(i)
     local count = turtle.getItemCount()
     turtle.suck(math.max(64 - count, 0))
-    refuelCharcoal()
+  else
+    turtle.suckUp(64)
   end
+  refuelCharcoal()
 end
 
 function findItem(name)
   for i=1,16 do
     data = turtle.getItemDetail(i)
-    if data and data.name == name
+    if data and data.name == name then
       return i
     end
   end
