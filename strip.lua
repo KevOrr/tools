@@ -78,7 +78,7 @@ function strip()
   local depth = 0
   while shouldContinue() do
     depth = depth + 1
-    print(string.format("INFO: fuel level: %s"), tostring(turtle.getFuelLevel()))
+    print(string.format("INFO: fuel level: %s", tostring(turtle.getFuelLevel())))
 
     dig()
     turtle.forward()
