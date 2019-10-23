@@ -31,7 +31,7 @@ function main()
       turtle.forward()
       digUp()
     end
-    turtle.back
+    turtle.back()
 
     -- place a torch
     turtle.turnRight()
