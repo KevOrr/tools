@@ -106,7 +106,7 @@ function unloadOres()
   for i=1,16 do
     turtle.select(i)
     local detail = turtle.getItemDetail()
-    if detail and detail.name ~= "minecraft:torch" and detail.name ~= "minecraft:charcoal" then
+    if detail ~= nil and detail.name ~= "minecraft:torch" and detail.name ~= "minecraft:charcoal" then
       turtle.drop()
     end
   end
@@ -192,7 +192,7 @@ end
 function inventoryAvail()
   for i=1,14 do
     local detail = turtle.getItemDetail(i)
-    if detail and (detail.name == "minecraft:cobblestone" or detail.name == "minecraft:gravel") then
+    if detail ~= nil and (detail.name == "minecraft:cobblestone" or detail.name == "minecraft:gravel") then
       turtle.select(i)
       turtle.drop()
     end
