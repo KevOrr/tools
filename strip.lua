@@ -105,17 +105,15 @@ function strip()
   while turtle.forward() do end
 end
 
-function unloadOres()
+function loadAndUnload()
   for i=1,16 do
     turtle.select(i)
     local detail = turtle.getItemDetail()
     if detail ~= nil and detail.name ~= "minecraft:torch" and detail.name ~= "minecraft:charcoal" then
-      turtle.drop()
+      turtle.dropDown()
     end
   end
-end
 
-function loadResources()
   while not hasTorches() do
     local idx = findItem("minecraft:torches")
     if idx >= 1 then
@@ -126,17 +124,19 @@ function loadResources()
       turtle.suckUp(64)
     end
   end
-  
+
   while not checkFuel() do
-    idx = findItem("minecraft:charcoal")
-    if idx >= 1 then
-      turtle.select(i)
-      local count = turtle.getItemCount()
-      turtle.suck(math.max(64 - count, 0))
-    else
-      turtle.suckUp(64)
+    for i=1,16 do
+      if turtle.getItemCount(i) == 0 then
+        turtle.select(i)
+        break
+      end
     end
-    refuelCharcoal()
+    turtle.suck(1)
+    turtle.refuel()
+    if turtle.getItemCount() ~= 0 then
+      turtle.dropDown()
+    end
   end
 end
 
@@ -172,7 +172,7 @@ function refuelAny()
     turtle.select(i)
     if turtle.refuel(0) then
       print(string.format("Warning: refueling with %s", turtle.getItemDetail().name))
-      refuelFrom(i)
+      return refuelFrom(i)
     end
   end
 end
@@ -182,14 +182,7 @@ function shouldContinue()
 end
 
 function checkFuel()
-  if turtle.getFuelLevel() == "unlimited" then
-    return true
-  end
-  if turtle.getFuelLevel() <= MINIMUM_FUEL then
-    print("Info: Low fuel")
-    return refuelCharcoal() or refuelAny()
-  end
-  return true
+  return turtle.getFuelLevel() == "unlimited" or turtle.getFuelLevel() > MINIMUM_FUEL
 end
 
 function inventoryAvail()
