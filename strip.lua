@@ -66,11 +66,11 @@ function dig()
 end
 
 function digUp()
-  local detect, detail = turtle.inspect()
+  local detect, detail = turtle.inspectUp()
   while detect and detail.name ~= "minecraft:torch" do
     turtle.digUp()
     sleep(0.3)
-    detect, detail = turtle.inspect()
+    detect, detail = turtle.inspectUp()
   end
 end
 
