@@ -9,6 +9,7 @@ if not #args == 0 then
 end
 
 function main()
+  print("Hold Ctrl-T to quit program")
   local distanceToChest = 0
   while true do
     -- strip until out of torches, inventory space, or fuel, then return
