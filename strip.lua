@@ -27,13 +27,10 @@ function main()
     turtle.turnRight()
     turtle.turnRight()
     for i=1,distanceToChest+5 do
-      if turtle.detect() then
-        turtle.dig()
-      end
+      dig()
       turtle.forward()
-      if turtle.detectUp() then
-        turtle.digUp()
-      end
+      digUp()
+      digIfNotTorch{above=true}
     end
 
     -- place a torch
@@ -61,30 +58,45 @@ function placeTorch(opts)
   return false
 end
 
+function dig()
+  while turtle.detectUp() do
+    turtle.dig()
+    sleep(0.2)
+  end
+end
+
+function digUp()
+  function dig()
+  while turtle.detectUp() do
+    turtle.digUp()
+    sleep(0.2)
+  end
+end
+
 function strip()
   local depth = 0
   while shouldContinue() do
     depth = depth + 1
 
-    turtle.dig()
+    dig()
     turtle.forward()
-    turtle.digUp()
+    digUp()
     turtle.turnLeft()
-    turtle.dig()
+    dig()
     turtle.up()
-    turtle.dig()
+    dig()
     turtle.turnRight()
     turtle.turnRight()
-    turtle.dig()
+    dig()
 
     if depth % 8 == 0 then
       placeTorch{above=false}
     end
 
     turtle.down()
-    turtle.dig()
+    dig()
     turtle.turnLeft()
-    end
+  end
 
   -- return to entrance of strip
   turtle.turnRight()
