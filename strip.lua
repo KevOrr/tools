@@ -192,7 +192,7 @@ end
 function inventoryAvail()
   for i=1,14 do
     local detail = turtle.getItemDetail(i)
-    if detail and detail.name == "minecraft:cobblestone" or detail.name == "minecraft:gravel" then
+    if detail and (detail.name == "minecraft:cobblestone" or detail.name == "minecraft:gravel") then
       turtle.select(i)
       turtle.drop()
     end
