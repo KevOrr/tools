@@ -26,11 +26,12 @@ function main()
     -- go to next strip entrance
     turtle.turnRight()
     turtle.turnRight()
-    for i=1,distanceToChest+5 do
+    for i=1,distanceToChest+6 do
       dig()
       turtle.forward()
       digUp()
     end
+    turtle.back
 
     -- place a torch
     turtle.turnRight()
@@ -65,9 +66,11 @@ function dig()
 end
 
 function digUp()
-  while turtle.detectUp() do
+  local detect, detail = turtle.inspect()
+  while detect and detail.name ~= "minecraft:torch" do
     turtle.digUp()
     sleep(0.3)
+    detect, detail = turtle.inspect()
   end
 end
 
