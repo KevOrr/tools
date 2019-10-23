@@ -58,7 +58,7 @@ function placeTorch(opts)
 end
 
 function dig()
-  while turtle.detectUp() do
+  while turtle.detect() do
     turtle.dig()
     sleep(0.2)
   end
