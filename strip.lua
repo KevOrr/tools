@@ -20,8 +20,7 @@ function main()
     while turtle.forward() do
       distanceToChest = distanceToChest + 1
     end
-    unloadOres()
-    loadResources()
+    loadAndUnload()
     
     -- go to next strip entrance
     turtle.turnRight()
