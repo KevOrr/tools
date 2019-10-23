@@ -60,14 +60,14 @@ end
 function dig()
   while turtle.detect() do
     turtle.dig()
-    sleep(0.2)
+    sleep(0.3)
   end
 end
 
 function digUp()
   while turtle.detectUp() do
     turtle.digUp()
-    sleep(0.2)
+    sleep(0.3)
   end
 end
 
@@ -191,6 +191,12 @@ end
 
 function inventoryAvail()
   for i=1,14 do
+    local detail = turtle.getItemDetail(i)
+    if detail and detail.name == "minecraft:cobblestone" or detail.name == "minecraft:gravel" then
+      turtle.select(i)
+      turtle.drop()
+    end
+      
     if turtle.getItemCount(i) == 0 then
       return true
     end
