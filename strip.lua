@@ -30,7 +30,6 @@ function main()
       dig()
       turtle.forward()
       digUp()
-      digIfNotTorch{above=true}
     end
 
     -- place a torch
@@ -66,7 +65,6 @@ function dig()
 end
 
 function digUp()
-  function dig()
   while turtle.detectUp() do
     turtle.digUp()
     sleep(0.2)
