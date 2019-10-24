@@ -82,11 +82,11 @@ function strip()
     print(string.format("INFO: fuel level: %s", tostring(turtle.getFuelLevel())))
 
     dig()
-    turtle.forward()
+    while not turtle.forward() do end
     digUp()
     turtle.turnLeft()
     dig()
-    turtle.up()
+    while not turtle.up() do end
     dig()
     turtle.turnRight()
     turtle.turnRight()
@@ -96,7 +96,7 @@ function strip()
       placeTorch{above=false}
     end
 
-    turtle.down()
+    while not turtle.down() do end
     dig()
     turtle.turnLeft()
   end
