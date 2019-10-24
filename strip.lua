@@ -78,6 +78,7 @@ function strip()
   local depth = 0
   while shouldContinue() do
     depth = depth + 1
+    turtle.select(1)
     print(string.format("INFO: fuel level: %s", tostring(turtle.getFuelLevel())))
 
     dig()
@@ -187,7 +188,7 @@ function checkFuel()
 end
 
 function inventoryAvail()
-  for i=1,14 do
+  for i=1,16 do
     local detail = turtle.getItemDetail(i)
     if detail ~= nil and (detail.name == "minecraft:cobblestone" or detail.name == "minecraft:gravel") then
       turtle.select(i)
