@@ -7,7 +7,7 @@
 local ambientSleeps = 0.1
 
 -- Wrap drive of buffer network
-local bufferDrive = peripheral.wrap("tiledrive_7")
+local bufferDrive = peripheral.wrap("appliedenergistics2:drive_7")
 
 -- Wrap monitor
 local mon = peripheral.wrap("right")
@@ -22,7 +22,7 @@ local bufferInterface = peripheral.wrap("left")
 local bufferInterfaceDirection = "UP"
 
 -- Wrap interface of main network
-local interface = peripheral.wrap("tileinterface_6")
+local interface = peripheral.wrap("appliedenergistics2:interface_6")
 
 -- Cardinal direction from buffer network interface to main network interface
 local interfaceDirection = "DOWN"
@@ -39,12 +39,12 @@ local drivesDirectionRight = "NORTH"
 -- The [key] is made up of x and y as of how the drives are setup where x is the row (beginning 0 in the left) and y is the column from up to down (beginning 0 at the top)
 local drives = {
 	[11] = peripheral.wrap("bottom"),
-	[12] = peripheral.wrap("tiledrive_1"),
-	[13] = peripheral.wrap("tiledrive_2"),
-	[20] = peripheral.wrap("tiledrive_6"),
-	[21] = peripheral.wrap("tiledrive_5"),
-	[22] = peripheral.wrap("tiledrive_4"),
-	[23] = peripheral.wrap("tiledrive_3"),
+	[12] = peripheral.wrap("appliedenergistics2:drive_1"),
+	[13] = peripheral.wrap("appliedenergistics2:drive_2"),
+	[20] = peripheral.wrap("appliedenergistics2:drive_6"),
+	[21] = peripheral.wrap("appliedenergistics2:drive_5"),
+	[22] = peripheral.wrap("appliedenergistics2:drive_4"),
+	[23] = peripheral.wrap("appliedenergistics2:drive_3"),
 }
 
 ------- End of Config ---------
